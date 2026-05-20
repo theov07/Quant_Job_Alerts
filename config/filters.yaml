@@ -1,0 +1,54 @@
+minimum_score: 3
+show_match_reasons: false
+
+positive_keywords:
+  - quant
+  - quantitative
+  - researcher
+  - research
+  - trader
+  - trading
+  - systematic
+  - alpha
+  - portfolio
+  - market making
+  - execution
+  - microstructure
+  - machine learning
+  - statistical arbitrage
+  - options
+  - derivatives
+  - volatility
+  - intern
+  - internship
+  - graduate
+  - summer
+
+negative_keywords:
+  - legal
+  - compliance
+  - recruiter
+  - hr
+  - accounting
+  - office manager
+  - sales
+  - marketing
+
+preferred_locations:
+  - London
+  - Paris
+  - New York
+  - Amsterdam
+  - Singapore
+  - Hong Kong
+  - Zurich
+  - Geneva
+  - Chicago
+
+weights:
+  title_quant: 3
+  title_core_role: 2
+  title_early_career: 2
+  preferred_location: 1
+  negative_keyword: -5
+  additional_positive_keyword: 1

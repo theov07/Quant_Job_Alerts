@@ -1,0 +1,15 @@
+sources:
+  simplify:
+    enabled: true
+    type: simplify
+    url: "https://simplify.jobs/l/Top-Quant-Finance-Jobs"
+
+  efinancialcareers:
+    enabled: true
+    type: efinancialcareers
+    max_pages: 1
+    pause_seconds: 1.0
+    urls:
+      - "https://www.efinancialcareers.com/jobs/quant"
+      - "https://www.efinancialcareers.com/jobs/Quantitative-Analyst"
+      - "https://www.efinancialcareers.com/jobs/Quantitative-Research-Analyst"

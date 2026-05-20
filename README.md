@@ -258,7 +258,11 @@ Example:
 
 ### GitHub Actions
 
-The repo includes `.github/workflows/job-monitor.yml`, which runs every 30 minutes and also supports manual dispatch.
+The repo includes `.github/workflows/job-monitor.yml`, which:
+
+- runs automatically on every push to `main`
+- runs every 30 minutes
+- supports manual dispatch from the GitHub Actions UI
 
 Add this secret before using it:
 

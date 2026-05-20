@@ -77,7 +77,7 @@ cp .env.example .env
 ```env
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 LOG_LEVEL=INFO
-MIN_SCORE=3
+MIN_SCORE=4
 DATABASE_PATH=data/seen_jobs.sqlite
 REQUEST_TIMEOUT_SECONDS=20
 SHOW_MATCH_REASONS=false
@@ -159,7 +159,7 @@ Current defaults:
 - `-5` per matched negative keyword
 - `+1` for additional broader quant keywords in the full job text
 
-Only jobs at or above the configured threshold are eligible for alerting.
+Only jobs at or above the configured threshold are eligible for alerting. The current default minimum score is `4`.
 
 All keywords and weights live in `config/filters.yaml`.
 

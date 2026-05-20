@@ -43,7 +43,7 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           LOG_LEVEL: INFO
-          MIN_SCORE: 3
+          MIN_SCORE: 4
           DATABASE_PATH: data/seen_jobs.sqlite
         run: python -m src.main
 

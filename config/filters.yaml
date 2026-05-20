@@ -22,6 +22,13 @@ positive_keywords:
   - intern
   - internship
   - graduate
+  - new grad
+  - new grads
+  - early career
+  - graduate program
+  - campus
+  - entry level
+  - junior
   - summer
 
 negative_keywords:
@@ -38,7 +45,11 @@ preferred_locations:
   - London
   - Paris
   - New York
+  - Boston
+  - Miami
   - Amsterdam
+  - Dublin
+  - Frankfurt
   - Singapore
   - Hong Kong
   - Zurich

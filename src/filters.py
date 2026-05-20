@@ -9,7 +9,19 @@ from .models import Job
 
 QUANT_TITLE_KEYWORDS = {"quant", "quantitative"}
 CORE_ROLE_KEYWORDS = {"research", "researcher", "trader", "trading"}
-EARLY_CAREER_KEYWORDS = {"intern", "internship", "graduate", "summer"}
+EARLY_CAREER_KEYWORDS = {
+    "intern",
+    "internship",
+    "graduate",
+    "summer",
+    "new grad",
+    "new grads",
+    "early career",
+    "graduate program",
+    "campus",
+    "entry level",
+    "junior",
+}
 
 
 @dataclass(slots=True)

@@ -268,11 +268,13 @@ Add this secret before using it:
 
 - `DISCORD_WEBHOOK_URL`
 
-Important caveat:
+GitHub Actions persistence:
 
-GitHub-hosted runners do not persist `data/seen_jobs.sqlite` between runs.
+GitHub-hosted runners are ephemeral, so this project now persists `data/seen_jobs.sqlite` on a dedicated branch named `job-alert-state`.
 
-That means the included workflow is fine as a starting point, but it can resend duplicate jobs unless you later add persistent state. Good future options are:
+That means scheduled runs restore the last seen-job state before scraping, which prevents the repeated duplicate alerts you were seeing.
+
+This is a practical GitHub-only solution, but a hosted database is still the more robust long-term option. Good future options are:
 
 - a small hosted database
 - a persistent object store

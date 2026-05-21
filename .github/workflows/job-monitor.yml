@@ -8,6 +8,9 @@ on:
   schedule:
     - cron: "*/30 * * * *"
 
+permissions:
+  contents: write
+
 concurrency:
   group: quant-job-alerts-monitor
   cancel-in-progress: false
@@ -19,6 +22,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -34,6 +39,19 @@ jobs:
             exit 1
           fi
 
+      - name: Restore persisted seen jobs database
+        env:
+          STATE_BRANCH: job-alert-state
+        run: |
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin "$STATE_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$STATE_BRANCH":"$STATE_BRANCH"
+            git checkout "$STATE_BRANCH" -- data/seen_jobs.sqlite || true
+            echo "Restored persisted database from branch $STATE_BRANCH"
+          else
+            echo "No persisted state branch found yet. Starting with a fresh database."
+          fi
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -47,6 +65,39 @@ jobs:
           DATABASE_PATH: data/seen_jobs.sqlite
         run: python -m src.main
 
-      # Note:
-      # GitHub-hosted runners are ephemeral, so data/seen_jobs.sqlite will not persist
-      # across scheduled runs unless you add an external persistence strategy later.
+      - name: Persist seen jobs database
+        if: always()
+        env:
+          STATE_BRANCH: job-alert-state
+        run: |
+          if [ ! -f data/seen_jobs.sqlite ]; then
+            echo "No database file was created. Skipping persistence."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          rm -rf .state-branch
+          if git ls-remote --exit-code --heads origin "$STATE_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$STATE_BRANCH":"$STATE_BRANCH"
+            git worktree add .state-branch "$STATE_BRANCH"
+          else
+            git worktree add -b "$STATE_BRANCH" .state-branch
+          fi
+
+          mkdir -p .state-branch/data
+          cp data/seen_jobs.sqlite .state-branch/data/seen_jobs.sqlite
+
+          cd .state-branch
+          git add -f data/seen_jobs.sqlite
+          if git diff --cached --quiet; then
+            echo "No seen-jobs changes to persist."
+            exit 0
+          fi
+
+          git commit -m "Update seen jobs state"
+          git push origin "$STATE_BRANCH"
+
+      # The workflow persists data/seen_jobs.sqlite on a dedicated branch so
+      # scheduled runs can restore deduplication state across ephemeral runners.

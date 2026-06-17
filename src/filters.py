@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 import re
 
 from .config import FilterConfig
@@ -39,6 +40,10 @@ class JobFilter:
 
     def evaluate(self, job: Job, minimum_score: int | None = None) -> FilterDecision:
         threshold = minimum_score if minimum_score is not None else self.config.minimum_score
+        freshness_decision = self._evaluate_freshness(job)
+        if freshness_decision is not None:
+            return freshness_decision
+
         title_text = (job.title or "").lower()
         full_text = " ".join(
             filter(
@@ -144,6 +149,52 @@ class JobFilter:
             matched_positive=matched_positive,
             matched_negative=matched_negative,
         )
+
+    def _evaluate_freshness(self, job: Job) -> FilterDecision | None:
+        max_age_days = self.config.maximum_age_days
+        if max_age_days is None:
+            return None
+
+        if not job.posted_at:
+            if self.config.require_posted_at:
+                return FilterDecision(
+                    score=0,
+                    passed=False,
+                    reasons=[f"missing posted date; maximum age is {max_age_days} days"],
+                )
+            return None
+
+        posted_at = self._parse_posted_at(job.posted_at)
+        if posted_at is None:
+            if self.config.require_posted_at:
+                return FilterDecision(
+                    score=0,
+                    passed=False,
+                    reasons=[f"unparseable posted date '{job.posted_at}'; maximum age is {max_age_days} days"],
+                )
+            return None
+
+        now = datetime.now(timezone.utc)
+        cutoff = now - timedelta(days=max_age_days)
+        if posted_at < cutoff:
+            age_days = max(0, (now - posted_at).days)
+            return FilterDecision(
+                score=0,
+                passed=False,
+                reasons=[f"older than maximum age: {age_days} days > {max_age_days} days"],
+            )
+
+        return None
+
+    @staticmethod
+    def _parse_posted_at(value: str) -> datetime | None:
+        try:
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        if parsed.tzinfo is None:
+            return parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
 
     @staticmethod
     def _find_matches(text: str, keywords: set[str] | list[str]) -> list[str]:

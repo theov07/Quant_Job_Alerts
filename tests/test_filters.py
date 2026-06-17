@@ -2,12 +2,14 @@ import unittest
 
 from src.config import FilterConfig, ScoreWeights
 from src.filters import JobFilter
-from src.models import Job
+from src.models import Job, utc_now_iso
 
 
 def build_filter() -> JobFilter:
     config = FilterConfig(
         minimum_score=3,
+        maximum_age_days=31,
+        require_posted_at=True,
         positive_keywords=[
             "quant",
             "quantitative",
@@ -42,6 +44,7 @@ class JobFilterTests(unittest.TestCase):
             title="Graduate Quant Trader",
             location="Amsterdam",
             url="https://example.com/optiver",
+            posted_at=utc_now_iso(),
             description_snippet="Systematic trading internship style rotation.",
             tags=["Trading"],
         )
@@ -58,6 +61,7 @@ class JobFilterTests(unittest.TestCase):
             title="Quant Compliance Analyst",
             location="London",
             url="https://example.com/acme",
+            posted_at=utc_now_iso(),
         )
 
         decision = build_filter().evaluate(job)
@@ -72,6 +76,7 @@ class JobFilterTests(unittest.TestCase):
             title="MEV Researcher",
             location="Remote",
             url="https://example.com/flashbots",
+            posted_at=utc_now_iso(),
             description_snippet="DeFi market structure and protocol research.",
             tags=["DeFi", "Protocol"],
         )
@@ -88,6 +93,7 @@ class JobFilterTests(unittest.TestCase):
             title="Head of Growth",
             location="Remote",
             url="https://example.com/growth",
+            posted_at=utc_now_iso(),
             description_snippet="Category: Marketing | Tags: DEX, DeFi",
             tags=["DEX", "DeFi", "Marketing"],
         )
@@ -96,6 +102,39 @@ class JobFilterTests(unittest.TestCase):
 
         self.assertFalse(decision.passed)
         self.assertIn("marketing", decision.matched_negative)
+
+    def test_filter_rejects_jobs_older_than_configured_age(self) -> None:
+        job = Job.create(
+            source="Sample",
+            company="Kronos Research",
+            title="2025 Summer Analyst (Summer Internship Program)",
+            location="Taipei",
+            url="https://example.com/kronos-2025",
+            posted_at="2025-03-19T18:53:27+00:00",
+            description_snippet="Quant research internship.",
+            tags=["Quant", "Internship"],
+        )
+
+        decision = build_filter().evaluate(job, minimum_score=4)
+
+        self.assertFalse(decision.passed)
+        self.assertIn("older than maximum age", decision.reasons[0])
+
+    def test_filter_rejects_jobs_without_posted_date_when_required(self) -> None:
+        job = Job.create(
+            source="Sample",
+            company="Unknown",
+            title="Quant Trader",
+            location="London",
+            url="https://example.com/no-date",
+            description_snippet="Trading role.",
+            tags=["Trading"],
+        )
+
+        decision = build_filter().evaluate(job, minimum_score=4)
+
+        self.assertFalse(decision.passed)
+        self.assertIn("missing posted date", decision.reasons[0])
 
 
 if __name__ == "__main__":

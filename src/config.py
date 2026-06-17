@@ -28,6 +28,8 @@ class AppSettings(BaseModel):
     request_timeout_seconds: float = 20.0
     user_agent: str = "quant-job-alerts/1.0 (+respectful scraping; contact the repo owner before production scale)"
     discord_embed_color: int = 3_447_003
+    discord_min_interval_seconds: float = 0.75
+    discord_max_retries: int = 6
     show_match_reasons: bool | None = None
 
     @classmethod
@@ -44,6 +46,8 @@ class AppSettings(BaseModel):
             min_score=int(os.getenv("MIN_SCORE", "3")),
             database_path=database_path,
             request_timeout_seconds=float(os.getenv("REQUEST_TIMEOUT_SECONDS", "20")),
+            discord_min_interval_seconds=float(os.getenv("DISCORD_MIN_INTERVAL_SECONDS", "0.75")),
+            discord_max_retries=int(os.getenv("DISCORD_MAX_RETRIES", "6")),
             show_match_reasons=(
                 parse_bool(show_match_reasons_env) if show_match_reasons_env is not None else None
             ),
@@ -79,6 +83,8 @@ class ScoreWeights(BaseModel):
 class FilterConfig(BaseModel):
     minimum_score: int = 3
     show_match_reasons: bool = False
+    maximum_age_days: int | None = 31
+    require_posted_at: bool = True
     crypto_domain_keywords: list[str] = Field(default_factory=list)
     positive_keywords: list[str] = Field(default_factory=list)
     negative_keywords: list[str] = Field(default_factory=list)

@@ -83,6 +83,8 @@ LOG_LEVEL=INFO
 MIN_SCORE=4
 DATABASE_PATH=data/seen_jobs.sqlite
 REQUEST_TIMEOUT_SECONDS=20
+DISCORD_MIN_INTERVAL_SECONDS=0.75
+DISCORD_MAX_RETRIES=6
 SHOW_MATCH_REASONS=false
 ```
 
@@ -152,6 +154,10 @@ Set these values:
   Local SQLite file path. The default is `data/seen_jobs.sqlite`
 - `REQUEST_TIMEOUT_SECONDS`
   HTTP timeout for source fetches and webhook delivery
+- `DISCORD_MIN_INTERVAL_SECONDS`
+  Minimum delay between Discord webhook sends. Default: `0.75`
+- `DISCORD_MAX_RETRIES`
+  Number of retry attempts when Discord returns a rate-limit response. Default: `6`
 - `SHOW_MATCH_REASONS`
   Optional override for whether Discord embeds include a final `Why it matched` field. Default: `false`
 
@@ -161,6 +167,7 @@ Filtering is score-based, not just boolean.
 
 Current defaults:
 
+- Jobs must have a parseable posted date and be no older than `31` days
 - `+3` if the title contains `quant` or `quantitative`
 - `+2` if the title contains `research`, `researcher`, `trader`, or `trading`
 - `+2` if the title contains `intern`, `internship`, `graduate`, or `summer`
@@ -170,9 +177,9 @@ Current defaults:
 - `+1` for crypto/Web3 domain support in the full job text, capped at 3 matches
 - `+1` for additional broader quant keywords in the full job text
 
-Only jobs at or above the configured threshold are eligible for alerting. The current default minimum score is `4`.
+Only fresh jobs at or above the configured threshold are eligible for alerting. The current default minimum score is `4`.
 
-All keywords and weights live in `config/filters.yaml`.
+All keywords, weights, and freshness rules live in `config/filters.yaml`.
 
 ## Deduplication
 

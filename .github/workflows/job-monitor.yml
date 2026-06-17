@@ -63,6 +63,8 @@ jobs:
           LOG_LEVEL: INFO
           MIN_SCORE: 4
           DATABASE_PATH: data/seen_jobs.sqlite
+          DISCORD_MIN_INTERVAL_SECONDS: 0.75
+          DISCORD_MAX_RETRIES: 6
         run: python -m src.main
 
       - name: Persist seen jobs database

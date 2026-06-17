@@ -104,6 +104,8 @@ def main() -> int:
             timeout_seconds=settings.request_timeout_seconds,
             embed_color=settings.discord_embed_color,
             show_match_reasons=show_match_reasons,
+            min_interval_seconds=settings.discord_min_interval_seconds,
+            max_retries=settings.discord_max_retries,
         )
 
     if args.sample_data:

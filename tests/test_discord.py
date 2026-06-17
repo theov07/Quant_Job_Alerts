@@ -1,7 +1,25 @@
 import unittest
+from unittest.mock import patch
+
+import httpx
 
 from src.discord import DiscordWebhookClient
 from src.models import Job
+
+
+class FakeHttpClient:
+    def __init__(self, responses: list[httpx.Response]) -> None:
+        self.responses = responses
+        self.calls = 0
+
+    def post(self, url: str, json: dict) -> httpx.Response:
+        self.calls += 1
+        return self.responses.pop(0)
+
+
+def build_response(status_code: int, payload: dict | None = None) -> httpx.Response:
+    request = httpx.Request("POST", "https://example.com/webhook?with_components=true")
+    return httpx.Response(status_code=status_code, json=payload, request=request)
 
 
 class DiscordWebhookClientTests(unittest.TestCase):
@@ -80,6 +98,44 @@ class DiscordWebhookClientTests(unittest.TestCase):
             client._build_webhook_request_url(),
             "https://example.com/webhook?wait=true&with_components=true",
         )
+
+    def test_webhook_retries_after_discord_rate_limit(self) -> None:
+        client = DiscordWebhookClient(
+            webhook_url="https://example.com/webhook",
+            min_interval_seconds=0,
+            max_retries=2,
+        )
+        fake_client = FakeHttpClient(
+            [
+                build_response(429, {"message": "rate limited", "retry_after": 0.3}),
+                build_response(204),
+            ]
+        )
+
+        with patch("src.discord.LOGGER.warning"), patch("src.discord.time.sleep") as sleep:
+            client._post_webhook_with_retries(client=fake_client, payload={"embeds": []})
+
+        self.assertEqual(fake_client.calls, 2)
+        sleep.assert_called_once_with(0.3)
+
+    def test_webhook_fails_after_retry_limit(self) -> None:
+        client = DiscordWebhookClient(
+            webhook_url="https://example.com/webhook",
+            min_interval_seconds=0,
+            max_retries=1,
+        )
+        fake_client = FakeHttpClient(
+            [
+                build_response(429, {"message": "rate limited", "retry_after": 0.1}),
+                build_response(429, {"message": "still rate limited", "retry_after": 0.1}),
+            ]
+        )
+
+        with patch("src.discord.LOGGER.warning"), patch("src.discord.time.sleep"):
+            with self.assertRaises(RuntimeError):
+                client._post_webhook_with_retries(client=fake_client, payload={"embeds": []})
+
+        self.assertEqual(fake_client.calls, 2)
 
 
 if __name__ == "__main__":

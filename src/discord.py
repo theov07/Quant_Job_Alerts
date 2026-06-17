@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import logging
+import time
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
@@ -20,25 +21,64 @@ class DiscordWebhookClient:
         timeout_seconds: float = 10.0,
         embed_color: int = 3_447_003,
         show_match_reasons: bool = False,
+        min_interval_seconds: float = 0.75,
+        max_retries: int = 6,
     ) -> None:
         self.webhook_url = webhook_url
         self.timeout_seconds = timeout_seconds
         self.embed_color = embed_color
         self.show_match_reasons = show_match_reasons
+        self.min_interval_seconds = max(0.0, min_interval_seconds)
+        self.max_retries = max(0, max_retries)
+        self._last_send_monotonic: float | None = None
 
     def send_job_embed(self, job: Job, score: int, reasons: list[str] | None = None) -> None:
         payload = self._build_payload(job=job, score=score, reasons=reasons or [])
 
         with httpx.Client(timeout=self.timeout_seconds, follow_redirects=True) as client:
-            response = client.post(self._build_webhook_request_url(), json=payload)
-            try:
-                response.raise_for_status()
-            except httpx.HTTPStatusError as error:
-                raise RuntimeError(
-                    f"Discord webhook rejected the request with status {response.status_code}: {response.text}"
-                ) from error
+            self._post_webhook_with_retries(client=client, payload=payload)
 
         LOGGER.info("Sent Discord embed for %s at %s", job.title, job.company or "Unknown company")
+
+    def _post_webhook_with_retries(self, *, client: httpx.Client, payload: dict[str, Any]) -> None:
+        request_url = self._build_webhook_request_url()
+        for attempt in range(self.max_retries + 1):
+            self._respect_min_interval()
+            response = client.post(request_url, json=payload)
+
+            if response.status_code != 429:
+                try:
+                    response.raise_for_status()
+                except httpx.HTTPStatusError as error:
+                    raise RuntimeError(
+                        f"Discord webhook rejected the request with status {response.status_code}: {response.text}"
+                    ) from error
+                self._last_send_monotonic = time.monotonic()
+                return
+
+            if attempt >= self.max_retries:
+                raise RuntimeError(
+                    f"Discord webhook rejected the request with status {response.status_code} "
+                    f"after {self.max_retries} retries: {response.text}"
+                )
+
+            retry_after = max(self._parse_retry_after_seconds(response), self.min_interval_seconds)
+            LOGGER.warning(
+                "Discord rate limited a webhook request. Retrying in %.2fs (attempt %d/%d).",
+                retry_after,
+                attempt + 1,
+                self.max_retries,
+            )
+            time.sleep(retry_after)
+
+    def _respect_min_interval(self) -> None:
+        if self._last_send_monotonic is None or self.min_interval_seconds <= 0:
+            return
+
+        elapsed = time.monotonic() - self._last_send_monotonic
+        remaining = self.min_interval_seconds - elapsed
+        if remaining > 0:
+            time.sleep(remaining)
 
     def _build_payload(self, *, job: Job, score: int, reasons: list[str]) -> dict[str, Any]:
         return {
@@ -86,6 +126,29 @@ class DiscordWebhookClient:
         query = dict(parse_qsl(parts.query, keep_blank_values=True))
         query["with_components"] = "true"
         return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
+
+    @staticmethod
+    def _parse_retry_after_seconds(response: httpx.Response) -> float:
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = {}
+
+        retry_after = payload.get("retry_after")
+        if retry_after is not None:
+            try:
+                return max(0.0, float(retry_after))
+            except (TypeError, ValueError):
+                pass
+
+        header_value = response.headers.get("Retry-After")
+        if header_value is not None:
+            try:
+                return max(0.0, float(header_value))
+            except ValueError:
+                pass
+
+        return 1.0
 
     @staticmethod
     def _build_apply_button(job_url: str) -> dict[str, Any]:

@@ -1,6 +1,43 @@
 minimum_score: 4
 show_match_reasons: false
 
+crypto_domain_keywords:
+  - crypto
+  - cryptocurrency
+  - blockchain
+  - web3
+  - defi
+  - mev
+  - cex
+  - dex
+  - exchange
+  - prediction market
+  - prediction markets
+  - onchain
+  - on-chain
+  - digital assets
+  - token
+  - tokens
+  - tokenomics
+  - protocol
+  - smart contract
+  - smart contracts
+  - evm
+  - ethereum
+  - solidity
+  - liquidity
+  - amm
+  - rwa
+  - futures
+  - perps
+  - perpetual
+  - perpetuals
+  - staking
+  - validator
+  - rollup
+  - zero knowledge
+  - zk
+
 positive_keywords:
   - quant
   - quantitative
@@ -38,6 +75,11 @@ negative_keywords:
   - hr
   - accounting
   - office manager
+  - customer support
+  - community manager
+  - content
+  - copywriter
+  - social media
   - sales
   - marketing
 
@@ -60,6 +102,8 @@ weights:
   title_quant: 3
   title_core_role: 2
   title_early_career: 2
+  title_crypto_domain: 2
   preferred_location: 1
   negative_keyword: -5
+  crypto_domain_keyword: 1
   additional_positive_keyword: 1

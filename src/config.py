@@ -69,14 +69,17 @@ class ScoreWeights(BaseModel):
     title_quant: int = 3
     title_core_role: int = 2
     title_early_career: int = 2
+    title_crypto_domain: int = 2
     preferred_location: int = 1
     negative_keyword: int = -5
+    crypto_domain_keyword: int = 1
     additional_positive_keyword: int = 1
 
 
 class FilterConfig(BaseModel):
     minimum_score: int = 3
     show_match_reasons: bool = False
+    crypto_domain_keywords: list[str] = Field(default_factory=list)
     positive_keywords: list[str] = Field(default_factory=list)
     negative_keywords: list[str] = Field(default_factory=list)
     preferred_locations: list[str] = Field(default_factory=list)

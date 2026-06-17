@@ -89,6 +89,15 @@ class JobFilter:
             )
             matched_positive.extend(early_hits)
 
+        title_domain_hits = self._find_matches(title_text, self.config.crypto_domain_keywords)
+        if title_domain_hits:
+            score += self.config.weights.title_crypto_domain
+            reasons.append(
+                f"+{self.config.weights.title_crypto_domain} crypto domain title match: "
+                f"{', '.join(title_domain_hits)}"
+            )
+            matched_positive.extend(title_domain_hits)
+
         location_hits = self._find_matches(full_text, self.config.preferred_locations)
         if location_hits:
             score += self.config.weights.preferred_location
@@ -103,6 +112,18 @@ class JobFilter:
             score += penalty
             reasons.append(f"{penalty} negative keyword match: {', '.join(negative_hits)}")
             matched_negative.extend(negative_hits)
+
+        domain_hits = [
+            keyword
+            for keyword in self._find_matches(full_text, self.config.crypto_domain_keywords)
+            if keyword not in matched_positive
+        ]
+        if domain_hits:
+            bonus_count = min(len(domain_hits), 3)
+            bonus = self.config.weights.crypto_domain_keyword * bonus_count
+            score += bonus
+            reasons.append(f"+{bonus} crypto domain support: {', '.join(domain_hits[:bonus_count])}")
+            matched_positive.extend(domain_hits[:bonus_count])
 
         additional_hits = [
             keyword

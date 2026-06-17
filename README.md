@@ -4,6 +4,7 @@ A clean Python job alert bot for Discord focused on Quant Research, Quant Tradin
 
 It currently supports:
 
+- Cryptocurrency Jobs crypto/Web3 listing pages
 - Simplify Quant Finance Jobs
 - eFinancialCareers quant search pages
 
@@ -44,9 +45,11 @@ quant-job-alerts/
 │   └── sources/
 │       ├── __init__.py
 │       ├── base.py
+│       ├── cryptocurrencyjobs.py
 │       ├── efinancialcareers.py
 │       └── simplify.py
 ├── tests/
+│   ├── test_cryptocurrencyjobs.py
 │   ├── test_filters.py
 │   ├── test_models.py
 │   └── test_storage.py
@@ -97,6 +100,12 @@ Dry run without Discord sending:
 
 ```bash
 python -m src.main --dry-run
+```
+
+Run only Cryptocurrency Jobs:
+
+```bash
+python -m src.main --source cryptocurrencyjobs
 ```
 
 Run only Simplify:
@@ -155,8 +164,10 @@ Current defaults:
 - `+3` if the title contains `quant` or `quantitative`
 - `+2` if the title contains `research`, `researcher`, `trader`, or `trading`
 - `+2` if the title contains `intern`, `internship`, `graduate`, or `summer`
+- `+2` if the title contains crypto/Web3 domain terms such as `defi`, `mev`, `cex`, `dex`, or `prediction markets`
 - `+1` if the job mentions a preferred location
 - `-5` per matched negative keyword
+- `+1` for crypto/Web3 domain support in the full job text, capped at 3 matches
 - `+1` for additional broader quant keywords in the full job text
 
 Only jobs at or above the configured threshold are eligible for alerting. The current default minimum score is `4`.
@@ -219,6 +230,12 @@ python -m src.main --sample-data --dry-run
 ```
 
 ## Notes On The Live Sources
+
+### Cryptocurrency Jobs
+
+The source parses server-rendered HTML listing cards from configured pages in `config/sources.yaml`.
+
+The default config checks the home page plus targeted pages for quant, research, trading, DeFi, finance, and engineering roles. Tags such as `DeFi`, `MEV`, `CEX`, `DEX`, `Prediction Markets`, `EVM`, and `onchain` are scored through `config/filters.yaml`.
 
 ### Simplify
 

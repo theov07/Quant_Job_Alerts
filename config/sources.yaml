@@ -1,4 +1,17 @@
 sources:
+  cryptocurrencyjobs:
+    enabled: true
+    type: cryptocurrencyjobs
+    pause_seconds: 1.0
+    urls:
+      - "https://cryptocurrencyjobs.co/"
+      - "https://cryptocurrencyjobs.co/quant/"
+      - "https://cryptocurrencyjobs.co/research/"
+      - "https://cryptocurrencyjobs.co/trading/"
+      - "https://cryptocurrencyjobs.co/defi/"
+      - "https://cryptocurrencyjobs.co/finance/"
+      - "https://cryptocurrencyjobs.co/engineering/"
+
   simplify:
     enabled: true
     type: simplify

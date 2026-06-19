@@ -10,6 +10,7 @@ def build_filter() -> JobFilter:
         minimum_score=3,
         maximum_age_days=31,
         require_posted_at=True,
+        excluded_title_keywords=["senior"],
         positive_keywords=[
             "quant",
             "quantitative",
@@ -102,6 +103,39 @@ class JobFilterTests(unittest.TestCase):
 
         self.assertFalse(decision.passed)
         self.assertIn("marketing", decision.matched_negative)
+
+    def test_filter_rejects_senior_title_before_scoring(self) -> None:
+        job = Job.create(
+            source="Ashby",
+            company="Keyrock",
+            title="Senior Quantitative Researcher",
+            location="London",
+            url="https://example.com/senior-quant",
+            posted_at=utc_now_iso(),
+            description_snippet="Crypto DeFi CEX DEX market-making research.",
+            tags=["Trading", "Quantitative Research"],
+        )
+
+        decision = build_filter().evaluate(job, minimum_score=4)
+
+        self.assertFalse(decision.passed)
+        self.assertEqual(decision.score, 0)
+        self.assertEqual(decision.matched_negative, ["senior"])
+        self.assertIn("excluded title keyword: senior", decision.reasons)
+
+    def test_filter_does_not_match_seniority_as_senior(self) -> None:
+        job = Job.create(
+            source="Sample",
+            company="Example",
+            title="Quant Trader - Open Seniority",
+            location="London",
+            url="https://example.com/open-seniority",
+            posted_at=utc_now_iso(),
+        )
+
+        decision = build_filter().evaluate(job, minimum_score=4)
+
+        self.assertTrue(decision.passed)
 
     def test_filter_rejects_jobs_older_than_configured_age(self) -> None:
         job = Job.create(

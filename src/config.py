@@ -54,6 +54,11 @@ class AppSettings(BaseModel):
         )
 
 
+class JobBoardDefinition(BaseModel):
+    name: str
+    slug: str
+
+
 class SourceDefinition(BaseModel):
     model_config = ConfigDict(extra="allow")
 
@@ -61,10 +66,10 @@ class SourceDefinition(BaseModel):
     type: str
     url: str | None = None
     urls: list[str] = Field(default_factory=list)
+    boards: list[JobBoardDefinition] = Field(default_factory=list)
+    include_compensation: bool = True
     max_pages: int = 1
     pause_seconds: float = 0.0
-
-
 class SourcesConfig(BaseModel):
     sources: dict[str, SourceDefinition]
 
@@ -85,6 +90,7 @@ class FilterConfig(BaseModel):
     show_match_reasons: bool = False
     maximum_age_days: int | None = 31
     require_posted_at: bool = True
+    excluded_title_keywords: list[str] = Field(default_factory=list)
     crypto_domain_keywords: list[str] = Field(default_factory=list)
     positive_keywords: list[str] = Field(default_factory=list)
     negative_keywords: list[str] = Field(default_factory=list)

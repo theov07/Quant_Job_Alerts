@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 import logging
+from typing import Any
 
 from bs4 import BeautifulSoup
 import httpx
@@ -48,7 +49,21 @@ class BaseJobSource(ABC):
             self.logger.warning("Failed to fetch %s from %s: %s", self.name, url, error)
             return None
 
+    def fetch_json(self, url: str) -> Any | None:
+        headers = {**self.headers, "Accept": "application/json"}
+        try:
+            with httpx.Client(
+                headers=headers,
+                timeout=self.timeout_seconds,
+                follow_redirects=True,
+            ) as client:
+                response = client.get(url)
+                response.raise_for_status()
+                return response.json()
+        except (httpx.HTTPError, ValueError) as error:
+            self.logger.warning("Failed to fetch JSON for %s from %s: %s", self.name, url, error)
+            return None
+
     @staticmethod
     def make_soup(html: str) -> BeautifulSoup:
         return BeautifulSoup(html, "html.parser")
-

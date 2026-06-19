@@ -40,6 +40,10 @@ class JobFilter:
 
     def evaluate(self, job: Job, minimum_score: int | None = None) -> FilterDecision:
         threshold = minimum_score if minimum_score is not None else self.config.minimum_score
+        title_exclusion_decision = self._evaluate_title_exclusions(job)
+        if title_exclusion_decision is not None:
+            return title_exclusion_decision
+
         freshness_decision = self._evaluate_freshness(job)
         if freshness_decision is not None:
             return freshness_decision
@@ -148,6 +152,17 @@ class JobFilter:
             reasons=reasons,
             matched_positive=matched_positive,
             matched_negative=matched_negative,
+        )
+
+    def _evaluate_title_exclusions(self, job: Job) -> FilterDecision | None:
+        matches = self._find_matches(job.title.lower(), self.config.excluded_title_keywords)
+        if not matches:
+            return None
+        return FilterDecision(
+            score=0,
+            passed=False,
+            reasons=[f"excluded title keyword: {', '.join(matches)}"],
+            matched_negative=matches,
         )
 
     def _evaluate_freshness(self, job: Job) -> FilterDecision | None:

@@ -1,4 +1,25 @@
 sources:
+  ashby:
+    enabled: true
+    type: ashby
+    include_compensation: true
+    pause_seconds: 0.25
+    boards:
+      - name: "Keyrock"
+        slug: "Keyrock"
+      - name: "Wincent"
+        slug: "wincent"
+      - name: "BlockTech"
+        slug: "blocktech"
+      - name: "Wormhole Labs"
+        slug: "wormholelabs"
+      - name: "Kuru Labs"
+        slug: "kuru-labs"
+      - name: "Noise Labs"
+        slug: "noise-labs"
+      - name: "Field Technologies"
+        slug: "infinitefield"
+
   cryptocurrencyjobs:
     enabled: true
     type: cryptocurrencyjobs

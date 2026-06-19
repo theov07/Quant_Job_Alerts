@@ -4,6 +4,7 @@ A clean Python job alert bot for Discord focused on Quant Research, Quant Tradin
 
 It currently supports:
 
+- Ashby public job boards for selected crypto and quantitative trading companies
 - Cryptocurrency Jobs crypto/Web3 listing pages
 - Simplify Quant Finance Jobs
 - eFinancialCareers quant search pages
@@ -44,12 +45,14 @@ quant-job-alerts/
 │   ├── storage.py
 │   └── sources/
 │       ├── __init__.py
+│       ├── ashby.py
 │       ├── base.py
 │       ├── cryptocurrencyjobs.py
 │       ├── efinancialcareers.py
 │       └── simplify.py
 ├── tests/
 │   ├── test_cryptocurrencyjobs.py
+│   ├── test_ashby.py
 │   ├── test_filters.py
 │   ├── test_models.py
 │   └── test_storage.py
@@ -110,6 +113,12 @@ Run only Cryptocurrency Jobs:
 python -m src.main --source cryptocurrencyjobs
 ```
 
+Run only the configured Ashby boards:
+
+```bash
+python -m src.main --source ashby
+```
+
 Run only Simplify:
 
 ```bash
@@ -168,6 +177,7 @@ Filtering is score-based, not just boolean.
 Current defaults:
 
 - Jobs must have a parseable posted date and be no older than `31` days
+- Titles containing the whole word `senior` are rejected before scoring
 - `+3` if the title contains `quant` or `quantitative`
 - `+2` if the title contains `research`, `researcher`, `trader`, or `trading`
 - `+2` if the title contains `intern`, `internship`, `graduate`, or `summer`
@@ -238,6 +248,15 @@ python -m src.main --sample-data --dry-run
 
 ## Notes On The Live Sources
 
+### Ashby
+
+The source uses Ashby's public JSON job-board API and reads the exact `publishedAt` value, so the
+31-day freshness rule applies without estimating dates from page text. The default boards cover
+Keyrock, Wincent, BlockTech, Wormhole Labs, Kuru Labs, Noise Labs, and Field Technologies.
+
+Add or remove companies through the `boards` list in `config/sources.yaml`; each entry needs a
+display `name` and the final `slug` from its `jobs.ashbyhq.com/{slug}` URL.
+
 ### Cryptocurrency Jobs
 
 The source parses server-rendered HTML listing cards from configured pages in `config/sources.yaml`.
@@ -260,7 +279,7 @@ If the configured URLs change, update `config/sources.yaml`.
 
 ## How To Add A New Source Later
 
-To add LinkedIn, Greenhouse, Lever, Ashby, Workday, or a direct hedge fund careers page later:
+To add LinkedIn, Greenhouse, Lever, Workday, or a direct hedge fund careers page later:
 
 1. Create a new file in `src/sources/`, for example `greenhouse.py`
 2. Implement a class that inherits from `BaseJobSource`
@@ -315,7 +334,7 @@ python -m unittest discover -s tests
 ## Extension Ideas
 
 - LinkedIn alert email parsing
-- Greenhouse, Lever, Ashby, and Workday adapters
+- Greenhouse, Lever, and Workday adapters
 - Better salary extraction
 - Persistent hosted dedupe storage
 - Richer Discord embeds with logos or source-specific badges

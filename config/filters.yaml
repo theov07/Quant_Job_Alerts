@@ -2,6 +2,8 @@ minimum_score: 4
 show_match_reasons: false
 maximum_age_days: 31
 require_posted_at: true
+excluded_title_keywords:
+  - senior
 
 crypto_domain_keywords:
   - crypto

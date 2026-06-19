@@ -5,6 +5,7 @@ A clean Python job alert bot for Discord focused on Quant Research, Quant Tradin
 It currently supports:
 
 - Ashby public job boards for selected crypto and quantitative trading companies
+- Greenhouse public job boards for major quantitative funds and trading firms
 - Cryptocurrency Jobs crypto/Web3 listing pages
 - Simplify Quant Finance Jobs
 - eFinancialCareers quant search pages
@@ -31,6 +32,7 @@ quant-job-alerts/
 │       └── job-monitor.yml
 ├── config/
 │   ├── filters.yaml
+│   ├── quant_firms.yaml
 │   └── sources.yaml
 ├── data/
 ├── src/
@@ -49,12 +51,15 @@ quant-job-alerts/
 │       ├── base.py
 │       ├── cryptocurrencyjobs.py
 │       ├── efinancialcareers.py
+│       ├── greenhouse.py
 │       └── simplify.py
 ├── tests/
 │   ├── test_cryptocurrencyjobs.py
 │   ├── test_ashby.py
 │   ├── test_filters.py
+│   ├── test_greenhouse.py
 │   ├── test_models.py
+│   ├── test_quant_firms.py
 │   └── test_storage.py
 ├── .env.example
 ├── .gitignore
@@ -117,6 +122,12 @@ Run only the configured Ashby boards:
 
 ```bash
 python -m src.main --source ashby
+```
+
+Run only the configured Greenhouse boards:
+
+```bash
+python -m src.main --source greenhouse
 ```
 
 Run only Simplify:
@@ -257,6 +268,18 @@ Keyrock, Wincent, BlockTech, Wormhole Labs, Kuru Labs, Noise Labs, and Field Tec
 Add or remove companies through the `boards` list in `config/sources.yaml`; each entry needs a
 display `name` and the final `slug` from its `jobs.ashbyhq.com/{slug}` URL.
 
+### Greenhouse
+
+The generic Greenhouse connector uses the public Job Board API with full posting content. It uses
+`first_published` for the 31-day freshness rule and intentionally does not treat a later edit as a
+new posting. The default configuration monitors 27 verified boards, including Jane Street, IMC,
+DRW, Tower Research, QRT, Squarepoint, WorldQuant, Point72/Cubist, AQR, and Man Group.
+
+`config/quant_firms.yaml` is a curated directory of 50 major quantitative funds, prop shops, and
+market makers. It records each official career page and whether the firm is already monitored by
+Greenhouse, partially monitored, or still needs a provider-specific connector. It is a coverage
+universe rather than a formal assets-under-management ranking.
+
 ### Cryptocurrency Jobs
 
 The source parses server-rendered HTML listing cards from configured pages in `config/sources.yaml`.
@@ -279,9 +302,9 @@ If the configured URLs change, update `config/sources.yaml`.
 
 ## How To Add A New Source Later
 
-To add LinkedIn, Greenhouse, Lever, Workday, or a direct hedge fund careers page later:
+To add LinkedIn, Lever, Workday, or a direct hedge fund careers page later:
 
-1. Create a new file in `src/sources/`, for example `greenhouse.py`
+1. Create a new file in `src/sources/`, for example `lever.py`
 2. Implement a class that inherits from `BaseJobSource`
 3. Normalize each listing into the shared `Job` model
 4. Register the source class in `src/sources/__init__.py`
@@ -334,7 +357,7 @@ python -m unittest discover -s tests
 ## Extension Ideas
 
 - LinkedIn alert email parsing
-- Greenhouse, Lever, and Workday adapters
+- Lever and Workday adapters
 - Better salary extraction
 - Persistent hosted dedupe storage
 - Richer Discord embeds with logos or source-specific badges

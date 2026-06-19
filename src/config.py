@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import os
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 import yaml
@@ -70,8 +70,23 @@ class SourceDefinition(BaseModel):
     include_compensation: bool = True
     max_pages: int = 1
     pause_seconds: float = 0.0
+
+
 class SourcesConfig(BaseModel):
     sources: dict[str, SourceDefinition]
+
+
+class QuantFirmDefinition(BaseModel):
+    name: str
+    category: str
+    careers_url: str
+    monitoring: Literal["greenhouse", "greenhouse_partial", "catalog_only"]
+    board_slug: str | None = None
+    notes: str | None = None
+
+
+class QuantFirmsConfig(BaseModel):
+    firms: list[QuantFirmDefinition]
 
 
 class ScoreWeights(BaseModel):
@@ -111,3 +126,8 @@ def load_sources_config(path: Path | None = None) -> SourcesConfig:
 def load_filter_config(path: Path | None = None) -> FilterConfig:
     config_path = path or (CONFIG_DIR / "filters.yaml")
     return FilterConfig.model_validate(load_yaml_file(config_path))
+
+
+def load_quant_firms_config(path: Path | None = None) -> QuantFirmsConfig:
+    config_path = path or (CONFIG_DIR / "quant_firms.yaml")
+    return QuantFirmsConfig.model_validate(load_yaml_file(config_path))

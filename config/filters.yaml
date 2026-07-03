@@ -4,6 +4,108 @@ maximum_age_days: 31
 require_posted_at: true
 excluded_title_keywords:
   - senior
+  - staff
+  - principal
+  - lead
+  - head
+  - director
+  - vp
+  - vice president
+  - manager
+  - business
+  - business development
+  - human resources
+  - people
+  - talent
+  - recruiter
+  - recruiting
+  - recruitment
+  - hr
+  - people partner
+  - talent acquisition
+  - operations
+  - legal
+  - counsel
+  - compliance
+  - accounting
+  - accountant
+  - tax
+  - payroll
+  - office manager
+  - admin
+  - administrative
+  - executive assistant
+  - administrative assistant
+  - facilities
+  - procurement
+  - marketing
+  - sales
+  - customer
+  - client
+  - support
+  - application support
+  - vendor service
+  - growth
+  - content
+  - copywriter
+  - social media
+  - communications
+  - public relations
+  - brand
+  - community
+  - partnerships
+  - partnership
+  - investor relations
+  - product
+  - program manager
+  - project manager
+  - coordinator
+
+required_title_keywords:
+  - quant
+  - quantitative
+  - research
+  - researcher
+  - trader
+  - trading
+  - quant developer
+  - quantitative developer
+  - quant engineer
+  - quantitative engineer
+  - research engineer
+  - trading developer
+  - trading engineer
+  - software engineer
+  - software engineering
+  - software developer
+  - data scientist
+  - data engineer
+  - scientist
+  - machine learning
+  - machine learning engineer
+  - ml engineer
+  - deep learning
+  - reinforcement learning
+  - ml
+  - ai
+  - systematic
+  - alpha
+  - execution
+  - market making
+  - microstructure
+  - algorithm
+  - algorithmic
+  - low latency
+  - fpga
+  - cryptography
+  - protocol
+  - smart contract
+  - solidity
+  - blockchain
+  - mev
+  - defi
+  - prediction market
+  - prediction markets
 
 crypto_domain_keywords:
   - crypto
@@ -47,6 +149,13 @@ positive_keywords:
   - quantitative
   - researcher
   - research
+  - scientist
+  - data scientist
+  - data engineer
+  - software engineer
+  - developer
+  - engineer
+  - engineering
   - trader
   - trading
   - systematic
@@ -56,6 +165,15 @@ positive_keywords:
   - execution
   - microstructure
   - machine learning
+  - deep learning
+  - reinforcement learning
+  - ml
+  - ai
+  - algorithm
+  - algorithmic
+  - low latency
+  - fpga
+  - cryptography
   - statistical arbitrage
   - options
   - derivatives
@@ -76,14 +194,42 @@ negative_keywords:
   - legal
   - compliance
   - recruiter
+  - recruiting
+  - recruitment
   - hr
+  - human resources
+  - people
+  - talent
+  - talent acquisition
   - accounting
+  - accountant
+  - tax
+  - payroll
   - office manager
+  - business manager
+  - business development
+  - operations
+  - program manager
+  - project manager
+  - product manager
+  - product marketing
+  - people partner
+  - executive assistant
+  - administrative assistant
+  - facilities
+  - procurement
   - customer support
+  - client services
+  - customer success
   - community manager
   - content
   - copywriter
   - social media
+  - communications
+  - public relations
+  - brand
+  - partnerships
+  - investor relations
   - sales
   - marketing
 

@@ -48,6 +48,10 @@ class JobFilter:
         if freshness_decision is not None:
             return freshness_decision
 
+        required_title_decision = self._evaluate_required_title_keywords(job)
+        if required_title_decision is not None:
+            return required_title_decision
+
         title_text = (job.title or "").lower()
         full_text = " ".join(
             filter(
@@ -163,6 +167,20 @@ class JobFilter:
             passed=False,
             reasons=[f"excluded title keyword: {', '.join(matches)}"],
             matched_negative=matches,
+        )
+
+    def _evaluate_required_title_keywords(self, job: Job) -> FilterDecision | None:
+        if not self.config.required_title_keywords:
+            return None
+
+        matches = self._find_matches(job.title.lower(), self.config.required_title_keywords)
+        if matches:
+            return None
+
+        return FilterDecision(
+            score=0,
+            passed=False,
+            reasons=["missing required scientific title keyword"],
         )
 
     def _evaluate_freshness(self, job: Job) -> FilterDecision | None:

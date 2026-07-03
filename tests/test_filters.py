@@ -10,7 +10,37 @@ def build_filter() -> JobFilter:
         minimum_score=3,
         maximum_age_days=31,
         require_posted_at=True,
-        excluded_title_keywords=["senior"],
+        excluded_title_keywords=[
+            "senior",
+            "head",
+            "manager",
+            "business",
+            "hr",
+            "people",
+            "recruiter",
+            "compliance",
+            "growth",
+            "support",
+        ],
+        required_title_keywords=[
+            "quant",
+            "quantitative",
+            "research",
+            "researcher",
+            "trader",
+            "trading",
+            "quant developer",
+            "quantitative developer",
+            "research engineer",
+            "software engineer",
+            "software developer",
+            "data scientist",
+            "data engineer",
+            "machine learning",
+            "machine learning engineer",
+            "mev",
+            "defi",
+        ],
         positive_keywords=[
             "quant",
             "quantitative",
@@ -102,7 +132,8 @@ class JobFilterTests(unittest.TestCase):
         decision = build_filter().evaluate(job, minimum_score=4)
 
         self.assertFalse(decision.passed)
-        self.assertIn("marketing", decision.matched_negative)
+        self.assertIn("head", decision.matched_negative)
+        self.assertIn("growth", decision.matched_negative)
 
     def test_filter_rejects_senior_title_before_scoring(self) -> None:
         job = Job.create(
@@ -136,6 +167,79 @@ class JobFilterTests(unittest.TestCase):
         decision = build_filter().evaluate(job, minimum_score=4)
 
         self.assertTrue(decision.passed)
+
+    def test_filter_rejects_business_manager_title_before_scoring(self) -> None:
+        job = Job.create(
+            source="Greenhouse",
+            company="Example Fund",
+            title="Business Manager, Quant Trading",
+            location="London",
+            url="https://example.com/business-manager",
+            posted_at=utc_now_iso(),
+            description_snippet="Quant research, DeFi, MEV, trading, machine learning.",
+            tags=["Quantitative Research"],
+        )
+
+        decision = build_filter().evaluate(job, minimum_score=4)
+
+        self.assertFalse(decision.passed)
+        self.assertEqual(decision.score, 0)
+        self.assertIn("business", decision.matched_negative)
+        self.assertIn("manager", decision.matched_negative)
+
+    def test_filter_rejects_hr_title_before_scoring(self) -> None:
+        job = Job.create(
+            source="Greenhouse",
+            company="Example Fund",
+            title="HR Business Partner - Quant Research",
+            location="Paris",
+            url="https://example.com/hr",
+            posted_at=utc_now_iso(),
+            description_snippet="Quantitative trading research team.",
+            tags=["Quantitative Research"],
+        )
+
+        decision = build_filter().evaluate(job, minimum_score=4)
+
+        self.assertFalse(decision.passed)
+        self.assertEqual(decision.score, 0)
+        self.assertIn("hr", decision.matched_negative)
+
+    def test_filter_requires_scientific_title_keyword(self) -> None:
+        job = Job.create(
+            source="Greenhouse",
+            company="Example Fund",
+            title="Graduate Rotational Associate",
+            location="London",
+            url="https://example.com/graduate-rotation",
+            posted_at=utc_now_iso(),
+            description_snippet="Quant research, DeFi, MEV, trading, machine learning.",
+            tags=["Quantitative Research"],
+        )
+
+        decision = build_filter().evaluate(job, minimum_score=4)
+
+        self.assertFalse(decision.passed)
+        self.assertEqual(decision.score, 0)
+        self.assertIn("missing required scientific title keyword", decision.reasons)
+
+    def test_filter_rejects_support_engineer_title_before_scoring(self) -> None:
+        job = Job.create(
+            source="Greenhouse",
+            company="Example Fund",
+            title="Application Support Engineer - Vendor Service",
+            location="London",
+            url="https://example.com/support-engineer",
+            posted_at=utc_now_iso(),
+            description_snippet="Supports quant trading systems and machine learning research.",
+            tags=["Trading"],
+        )
+
+        decision = build_filter().evaluate(job, minimum_score=4)
+
+        self.assertFalse(decision.passed)
+        self.assertEqual(decision.score, 0)
+        self.assertIn("support", decision.matched_negative)
 
     def test_filter_rejects_jobs_older_than_configured_age(self) -> None:
         job = Job.create(

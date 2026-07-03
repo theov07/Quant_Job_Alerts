@@ -188,7 +188,11 @@ Filtering is score-based, not just boolean.
 Current defaults:
 
 - Jobs must have a parseable posted date and be no older than `31` days
-- Titles containing the whole word `senior` are rejected before scoring
+- Titles containing seniority, business, HR, recruiting, legal, compliance, marketing,
+  sales, product, project, or operations terms are rejected before scoring
+- Titles must contain at least one scientific/technical role keyword such as
+  `quant`, `research`, `trader`, `engineer`, `developer`, `data scientist`,
+  `machine learning`, `algorithmic`, `MEV`, `DeFi`, or `prediction markets`
 - `+3` if the title contains `quant` or `quantitative`
 - `+2` if the title contains `research`, `researcher`, `trader`, or `trading`
 - `+2` if the title contains `intern`, `internship`, `graduate`, or `summer`

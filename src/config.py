@@ -106,6 +106,7 @@ class FilterConfig(BaseModel):
     maximum_age_days: int | None = 31
     require_posted_at: bool = True
     excluded_title_keywords: list[str] = Field(default_factory=list)
+    required_title_keywords: list[str] = Field(default_factory=list)
     crypto_domain_keywords: list[str] = Field(default_factory=list)
     positive_keywords: list[str] = Field(default_factory=list)
     negative_keywords: list[str] = Field(default_factory=list)

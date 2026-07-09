@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from .config import PROJECT_ROOT, AppSettings, load_filter_config, load_sources_config
 from .discord import DiscordWebhookClient
 from .filters import JobFilter
+from .routing import INTERNSHIP_ROUTE, alert_route_for_job
 from .sample_jobs import build_sample_jobs
 from .sources import SOURCE_REGISTRY, BaseJobSource
 from .storage import SeenJobStore
@@ -94,12 +95,13 @@ def main() -> int:
         else filter_config.show_match_reasons
     )
 
-    discord_client: DiscordWebhookClient | None = None
+    default_discord_client: DiscordWebhookClient | None = None
+    internship_discord_client: DiscordWebhookClient | None = None
     if not args.dry_run:
         if not settings.discord_webhook_url:
             LOGGER.error("DISCORD_WEBHOOK_URL is required unless you are using --dry-run.")
             return 1
-        discord_client = DiscordWebhookClient(
+        default_discord_client = DiscordWebhookClient(
             webhook_url=settings.discord_webhook_url,
             timeout_seconds=settings.request_timeout_seconds,
             embed_color=settings.discord_embed_color,
@@ -107,6 +109,19 @@ def main() -> int:
             min_interval_seconds=settings.discord_min_interval_seconds,
             max_retries=settings.discord_max_retries,
         )
+        if settings.discord_internship_webhook_url:
+            internship_discord_client = DiscordWebhookClient(
+                webhook_url=settings.discord_internship_webhook_url,
+                timeout_seconds=settings.request_timeout_seconds,
+                embed_color=settings.discord_embed_color,
+                show_match_reasons=show_match_reasons,
+                min_interval_seconds=settings.discord_min_interval_seconds,
+                max_retries=settings.discord_max_retries,
+            )
+        else:
+            LOGGER.warning(
+                "DISCORD_INTERNSHIP_WEBHOOK_URL is not set; internship alerts will use DISCORD_WEBHOOK_URL."
+            )
 
     if args.sample_data:
         all_jobs = build_sample_jobs()
@@ -146,14 +161,20 @@ def main() -> int:
             continue
 
         new_count += 1
+        route = alert_route_for_job(job)
         if args.dry_run:
             print(
-                f"DRY RUN | score={decision.score} | {job.company or 'Unknown'} | {job.title} | "
+                f"DRY RUN | route={route} | score={decision.score} | {job.company or 'Unknown'} | {job.title} | "
                 f"{job.location or 'Unknown'} | {job.url}"
             )
             continue
 
-        assert discord_client is not None
+        assert default_discord_client is not None
+        discord_client = (
+            internship_discord_client
+            if route == INTERNSHIP_ROUTE and internship_discord_client is not None
+            else default_discord_client
+        )
         try:
             discord_client.send_job_embed(job=job, score=decision.score, reasons=decision.reasons)
             store.mark_seen(job)

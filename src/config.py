@@ -22,6 +22,7 @@ def parse_bool(value: str | bool | None, default: bool = False) -> bool:
 
 class AppSettings(BaseModel):
     discord_webhook_url: str | None = None
+    discord_internship_webhook_url: str | None = None
     log_level: str = "INFO"
     min_score: int = 3
     database_path: Path = PROJECT_ROOT / "data" / "seen_jobs.sqlite"
@@ -42,6 +43,7 @@ class AppSettings(BaseModel):
 
         return cls(
             discord_webhook_url=os.getenv("DISCORD_WEBHOOK_URL") or None,
+            discord_internship_webhook_url=os.getenv("DISCORD_INTERNSHIP_WEBHOOK_URL") or None,
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             min_score=int(os.getenv("MIN_SCORE", "3")),
             database_path=database_path,

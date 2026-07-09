@@ -33,9 +33,14 @@ jobs:
       - name: Validate required secrets
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_INTERNSHIP_WEBHOOK_URL: ${{ secrets.DISCORD_INTERNSHIP_WEBHOOK_URL }}
         run: |
           if [ -z "$DISCORD_WEBHOOK_URL" ]; then
             echo "::error::Missing repository secret DISCORD_WEBHOOK_URL"
+            exit 1
+          fi
+          if [ -z "$DISCORD_INTERNSHIP_WEBHOOK_URL" ]; then
+            echo "::error::Missing repository secret DISCORD_INTERNSHIP_WEBHOOK_URL"
             exit 1
           fi
 
@@ -60,6 +65,7 @@ jobs:
       - name: Run job monitor
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_INTERNSHIP_WEBHOOK_URL: ${{ secrets.DISCORD_INTERNSHIP_WEBHOOK_URL }}
           LOG_LEVEL: INFO
           MIN_SCORE: 4
           DATABASE_PATH: data/seen_jobs.sqlite

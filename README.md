@@ -87,6 +87,7 @@ cp .env.example .env
 
 ```env
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+DISCORD_INTERNSHIP_WEBHOOK_URL=https://discord.com/api/webhooks/...
 LOG_LEVEL=INFO
 MIN_SCORE=4
 DATABASE_PATH=data/seen_jobs.sqlite
@@ -165,7 +166,10 @@ python -m src.main --sample-data --dry-run
 Set these values:
 
 - `DISCORD_WEBHOOK_URL`
-  Your Discord webhook URL. Leave it empty only if you are using `--dry-run`.
+  Your default Discord webhook URL for full-time, CDD, contract, and non-internship roles.
+- `DISCORD_INTERNSHIP_WEBHOOK_URL`
+  Optional dedicated Discord webhook URL for internship alerts. When set, jobs whose title,
+  employment type, or tags contain internship terms are sent there instead of the default webhook.
 - `LOG_LEVEL`
   Recommended value: `INFO`
 - `MIN_SCORE`
@@ -337,6 +341,7 @@ The repo includes `.github/workflows/job-monitor.yml`, which:
 Add this secret before using it:
 
 - `DISCORD_WEBHOOK_URL`
+- `DISCORD_INTERNSHIP_WEBHOOK_URL`
 
 GitHub Actions persistence:
 

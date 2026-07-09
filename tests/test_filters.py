@@ -12,6 +12,9 @@ def build_filter() -> JobFilter:
         require_posted_at=True,
         excluded_title_keywords=[
             "senior",
+            "expert",
+            "experienced",
+            "years minimum",
             "head",
             "manager",
             "business",
@@ -153,6 +156,25 @@ class JobFilterTests(unittest.TestCase):
         self.assertEqual(decision.score, 0)
         self.assertEqual(decision.matched_negative, ["senior"])
         self.assertIn("excluded title keyword: senior", decision.reasons)
+
+    def test_filter_rejects_expert_or_experienced_title_before_scoring(self) -> None:
+        job = Job.create(
+            source="SuccessFactors",
+            company="Capital Fund Management",
+            title="Expert Data Scientist Macroeconomics - 8 years minimum",
+            location="Paris",
+            url="https://example.com/expert-data-scientist",
+            posted_at=utc_now_iso(),
+            description_snippet="Research machine learning signals.",
+            tags=["Research"],
+        )
+
+        decision = build_filter().evaluate(job, minimum_score=4)
+
+        self.assertFalse(decision.passed)
+        self.assertEqual(decision.score, 0)
+        self.assertIn("expert", decision.matched_negative)
+        self.assertIn("years minimum", decision.matched_negative)
 
     def test_filter_does_not_match_seniority_as_senior(self) -> None:
         job = Job.create(

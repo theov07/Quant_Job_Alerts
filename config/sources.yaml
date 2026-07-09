@@ -14,6 +14,8 @@ sources:
         slug: "capstoneinvestmentadvisors"
       - name: "DRW"
         slug: "drweng"
+      - name: "DV Trading"
+        slug: "dvtrading"
       - name: "Engineers Gate"
         slug: "engineersgate"
       - name: "ExodusPoint"
@@ -24,18 +26,28 @@ sources:
         slug: "flowtraders"
       - name: "Geneva Trading"
         slug: "genevatrading"
+      - name: "Gelber Group"
+        slug: "gelbergroup"
       - name: "GSA Capital"
         slug: "gsacapital"
+      - name: "Headlands Technologies"
+        slug: "headlandstechnologiesllc"
       - name: "IMC Trading"
         slug: "imc"
       - name: "Jane Street"
         slug: "janestreet"
+      - name: "Jump Trading"
+        slug: "jumptrading"
       - name: "Jump Crypto"
         slug: "jumpcrypto"
+      - name: "Mako Trading"
+        slug: "mako"
       - name: "Man Group"
         slug: "mangroup"
       - name: "Marshall Wace"
         slug: "marshallwace"
+      - name: "Maven Securities"
+        slug: "mavensecuritiesholdingltd"
       - name: "Old Mission"
         slug: "oldmissioncapital"
       - name: "PDT Partners"
@@ -44,6 +56,10 @@ sources:
         slug: "point72"
       - name: "Qube Research & Technologies"
         slug: "quberesearchandtechnologies"
+      - name: "Radix Trading - Experienced"
+        slug: "radixexperienced"
+      - name: "Radix Trading - University"
+        slug: "radixuniversity"
       - name: "Schonfeld"
         slug: "schonfeld"
       - name: "Squarepoint Capital"
@@ -58,6 +74,48 @@ sources:
         slug: "winton"
       - name: "WorldQuant"
         slug: "worldquant"
+      - name: "B2C2"
+        slug: "b2c2"
+      - name: "Chicago Trading Company"
+        slug: "chicagotrading"
+
+  lever:
+    enabled: true
+    type: lever
+    pause_seconds: 0.1
+    boards:
+      - name: "Belvedere Trading"
+        slug: "belvederetrading"
+      - name: "Gauntlet"
+        slug: "gauntlet"
+      - name: "Valkyrie Trading"
+        slug: "valkyrietrading"
+
+  breezy:
+    enabled: true
+    type: breezy
+    pause_seconds: 0.1
+    boards:
+      - name: "Marex"
+        slug: "marex"
+
+  pinpoint:
+    enabled: true
+    type: pinpoint
+    pause_seconds: 0.1
+    boards:
+      - name: "Systematica Investments"
+        slug: "systematica"
+      - name: "Wolverine Trading"
+        slug: "careers.wolve.com"
+
+  successfactors:
+    enabled: true
+    type: successfactors
+    pause_seconds: 0.1
+    boards:
+      - name: "Capital Fund Management"
+        slug: "jobs.cfm.com"
 
   ashby:
     enabled: true
@@ -79,6 +137,8 @@ sources:
         slug: "noise-labs"
       - name: "Field Technologies"
         slug: "infinitefield"
+      - name: "Paradigm"
+        slug: "Paradigm"
 
   cryptocurrencyjobs:
     enabled: true

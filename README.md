@@ -5,7 +5,11 @@ A clean Python job alert bot for Discord focused on Quant Research, Quant Tradin
 It currently supports:
 
 - Ashby public job boards for selected crypto and quantitative trading companies
+- Breezy public JSON boards, including Marex
 - Greenhouse public job boards for major quantitative funds and trading firms
+- Lever public postings boards, including Belvedere, Gauntlet, and Valkyrie
+- Pinpoint public postings boards, including Systematica and Wolverine
+- SAP SuccessFactors careers pages, including CFM
 - Cryptocurrency Jobs crypto/Web3 listing pages
 - Simplify Quant Finance Jobs
 - eFinancialCareers quant search pages
@@ -49,17 +53,25 @@ quant-job-alerts/
 │       ├── __init__.py
 │       ├── ashby.py
 │       ├── base.py
+│       ├── breezy.py
 │       ├── cryptocurrencyjobs.py
 │       ├── efinancialcareers.py
 │       ├── greenhouse.py
-│       └── simplify.py
+│       ├── lever.py
+│       ├── pinpoint.py
+│       ├── simplify.py
+│       └── successfactors.py
 ├── tests/
-│   ├── test_cryptocurrencyjobs.py
 │   ├── test_ashby.py
+│   ├── test_breezy.py
+│   ├── test_cryptocurrencyjobs.py
 │   ├── test_filters.py
 │   ├── test_greenhouse.py
+│   ├── test_lever.py
 │   ├── test_models.py
+│   ├── test_pinpoint.py
 │   ├── test_quant_firms.py
+│   ├── test_successfactors.py
 │   └── test_storage.py
 ├── .env.example
 ├── .gitignore
@@ -129,6 +141,15 @@ Run only the configured Greenhouse boards:
 
 ```bash
 python -m src.main --source greenhouse
+```
+
+Run only Lever, Breezy, Pinpoint, or SuccessFactors:
+
+```bash
+python -m src.main --source lever
+python -m src.main --source breezy
+python -m src.main --source pinpoint
+python -m src.main --source successfactors
 ```
 
 Run only Simplify:
@@ -271,7 +292,7 @@ python -m src.main --sample-data --dry-run
 
 The source uses Ashby's public JSON job-board API and reads the exact `publishedAt` value, so the
 31-day freshness rule applies without estimating dates from page text. The default boards cover
-Keyrock, Wincent, BlockTech, Wormhole Labs, Kuru Labs, Noise Labs, and Field Technologies.
+Keyrock, Wincent, BlockTech, Wormhole Labs, Kuru Labs, Noise Labs, Field Technologies, and Paradigm.
 
 Add or remove companies through the `boards` list in `config/sources.yaml`; each entry needs a
 display `name` and the final `slug` from its `jobs.ashbyhq.com/{slug}` URL.
@@ -280,13 +301,36 @@ display `name` and the final `slug` from its `jobs.ashbyhq.com/{slug}` URL.
 
 The generic Greenhouse connector uses the public Job Board API with full posting content. It uses
 `first_published` for the 31-day freshness rule and intentionally does not treat a later edit as a
-new posting. The default configuration monitors 27 verified boards, including Jane Street, IMC,
-DRW, Tower Research, QRT, Squarepoint, WorldQuant, Point72/Cubist, AQR, and Man Group.
+new posting. The default configuration monitors 37 verified boards, including Jane Street, IMC,
+DRW, Jump Trading, DV Trading, Maven Securities, Radix, Headlands, Gelber, Mako, B2C2, CTC,
+Tower Research, QRT, Squarepoint, WorldQuant, Point72/Cubist, AQR, and Man Group.
 
-`config/quant_firms.yaml` is a curated directory of 50 major quantitative funds, prop shops, and
-market makers. It records each official career page and whether the firm is already monitored by
-Greenhouse, partially monitored, or still needs a provider-specific connector. It is a coverage
-universe rather than a formal assets-under-management ranking.
+`config/quant_firms.yaml` is a curated directory of 67 quantitative funds, prop shops, market
+makers, and crypto trading firms. It records each official career page and whether the firm is
+already monitored by Greenhouse, Ashby, Lever, Breezy, Pinpoint, SuccessFactors, or still needs a
+provider-specific connector. It is a coverage universe rather than a formal assets-under-management
+ranking.
+
+### Lever
+
+The Lever connector uses the public postings JSON feed. The default boards cover Belvedere Trading,
+Gauntlet, and Valkyrie Trading.
+
+### Breezy
+
+The Breezy connector uses each public `{company}.breezy.hr/json` feed. The default board covers
+Marex.
+
+### Pinpoint
+
+The Pinpoint connector uses each public `postings.json` feed, then reads the posting detail page's
+JobPosting schema when needed to recover `datePosted`. The default boards cover Systematica and
+Wolverine Trading.
+
+### SuccessFactors
+
+The SuccessFactors connector parses SAP SuccessFactors career pages and detail-page JobPosting
+metadata. The default board covers Capital Fund Management.
 
 ### Cryptocurrency Jobs
 
@@ -310,9 +354,9 @@ If the configured URLs change, update `config/sources.yaml`.
 
 ## How To Add A New Source Later
 
-To add LinkedIn, Lever, Workday, or a direct hedge fund careers page later:
+To add LinkedIn, Workday, Jobvite, or another direct hedge fund careers page later:
 
-1. Create a new file in `src/sources/`, for example `lever.py`
+1. Create a new file in `src/sources/`, for example `workday.py`
 2. Implement a class that inherits from `BaseJobSource`
 3. Normalize each listing into the shared `Job` model
 4. Register the source class in `src/sources/__init__.py`
@@ -366,7 +410,7 @@ python -m unittest discover -s tests
 ## Extension Ideas
 
 - LinkedIn alert email parsing
-- Lever and Workday adapters
+- Workday and Jobvite adapters
 - Better salary extraction
 - Persistent hosted dedupe storage
 - Richer Discord embeds with logos or source-specific badges

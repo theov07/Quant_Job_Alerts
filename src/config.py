@@ -82,8 +82,18 @@ class QuantFirmDefinition(BaseModel):
     name: str
     category: str
     careers_url: str
-    monitoring: Literal["greenhouse", "greenhouse_partial", "catalog_only"]
+    monitoring: Literal[
+        "ashby",
+        "breezy",
+        "greenhouse",
+        "greenhouse_partial",
+        "lever",
+        "pinpoint",
+        "successfactors",
+        "catalog_only",
+    ]
     board_slug: str | None = None
+    board_slugs: list[str] = Field(default_factory=list)
     notes: str | None = None
 
 
